@@ -95,6 +95,7 @@ Time = {time.time()-self.time}
         self.energy -= 12
         # print(self.energy)
         if self.energy < 0: self.energy = 0
+        self.stat()
         print('Дрон', self.id, 'закончил impact')
 
     def start(self):
@@ -112,21 +113,29 @@ Time = {time.time()-self.time}
             'impact':self.impact
         }
         first_hash = hashlib.md5(open(self.filename,'rb').read()).hexdigest()
-        p.start()
+        # p.start()
         while True:
+            with open('status.txt', 'r') as f:
+                if f.readline() == 'stop':
+                    try: 
+                        os.unlink('ids.txt')
+                        for file in os.listdir('stats/'): os.unlink(f'stats/{file}')
+                    except:
+                        pass
+                    break
             
             for task in self.tasks:
                 
                 if self.energy >= 12:
-                    p.join()
+                    # p.join()
                     task_dict[task]()
-                    p.start()
+                    self.stat()
                     
                 else:
                     print(f'Дрон {self.id} разряжен')
                     # p.join()
                     break
-            p.join()
+            # p.join()
             self.tasks = []
             second_hash = hashlib.md5(open(self.filename,'rb').read()).hexdigest()
             if second_hash != first_hash:
